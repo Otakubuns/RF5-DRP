@@ -11,20 +11,20 @@ namespace RF5DRP
     [BepInProcess("Rune Factory 5.exe")]
     public class Plugin : BasePlugin
     {
-        internal static new ManualLogSource Log;
-        private static ConfigEntry<bool> displayLevel;
-        private static ConfigEntry<bool> displayMoney;
-        private static ConfigEntry<bool> displayDate;
-        private static ConfigEntry<bool> displayLocation;
-        private static ConfigEntry<bool> displayName;
-        private static ConfigEntry<bool> optionalLook;
-        private static ConfigEntry<bool> displayGender;
+        internal new static ManualLogSource Log;
+        private static ConfigEntry<bool> _displayLevel;
+        private static ConfigEntry<bool> _displayMoney;
+        private static ConfigEntry<bool> _displayDate;
+        private static ConfigEntry<bool> _displayLocation;
+        private static ConfigEntry<bool> _displayName;
+        private static ConfigEntry<bool> _optionalLook;
+        private static ConfigEntry<bool> _displayGender;
         public static DiscordRpcClient Client { get; private set; }
-        private static int CurrentMoney;
-        private static int CurrentLevel = 0;
-        private static int CurrentDay;
-        private static string CurrentSeason;
-        private static string CurrentArea;
+        private static int _currentMoney;
+        private static int _currentLevel = 0;
+        private static int _currentDay;
+        private static string _currentSeason;
+        private static string _currentArea;
 
         public override void Load()
         {
@@ -36,37 +36,37 @@ namespace RF5DRP
             Client.Initialize();
 
             //Check config
-            displayLevel = Config.Bind("Discord Rich Presence",
+            _displayLevel = Config.Bind("Discord Rich Presence",
                                        "DisplayLevel",
                                        true,
                                        "Show current player level");
 
-            displayMoney = Config.Bind("Discord Rich Presence",
+            _displayMoney = Config.Bind("Discord Rich Presence",
                                        "DisplayMoney",
                                        true,
                                        "Show current money");
 
-            displayDate = Config.Bind("Discord Rich Presence",
+            _displayDate = Config.Bind("Discord Rich Presence",
                                        "DisplayDate",
                                        true,
                                        "Show the in-game date");
 
-            displayLocation = Config.Bind("Discord Rich Presence",
+            _displayLocation = Config.Bind("Discord Rich Presence",
                                        "DisplayLocation",
                                        true,
                                        "Show location name on large icon tooltip");
 
-            displayName = Config.Bind("Discord Rich Presence",
+            _displayName = Config.Bind("Discord Rich Presence",
                                        "DisplayName",
                                        true,
                                        "Display player name on small icon tooltip");
 
-            displayGender = Config.Bind("Discord Rich Presence",
+            _displayGender = Config.Bind("Discord Rich Presence",
                                       "DisplayGender",
                                       true,
                                       "Display player gender on small icon");
 
-            optionalLook = Config.Bind("Discord Rich Presence",
+            _optionalLook = Config.Bind("Discord Rich Presence",
                                        "AlternateLook",
                                        false,
                                        "Swaps the details(character info) and moves it to character icon(instead of name) with location being in state");
@@ -76,18 +76,18 @@ namespace RF5DRP
             Harmony.CreateAndPatchAll(typeof(LoadPatch));
             Harmony.CreateAndPatchAll(typeof(Calander));
 
-            if (displayLevel.Value)
+            if (_displayLevel.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(PlayerLevel));
             }
 
-            if (displayMoney.Value)
+            if (_displayMoney.Value)
             {
                 Harmony.CreateAndPatchAll(typeof(PlayerMoney));
             }
         }
 
-        private void SetPresence()
+        private static void SetPresence()
         {
             // Main Menu
             Client.SetPresence(new RichPresence()
@@ -107,87 +107,79 @@ namespace RF5DRP
             string gender = ActorPlayer.Gender.ToString().ToLower();
             int level = ActorPlayer.Status.Level;
             string playername = TextOverwriteList.GetPlayerName();
-            CurrentLevel = level;
-            string CurrentDayFormat = "";
+            _currentLevel = level;
 
-            switch (CurrentDay)
+            string CurrentDayFormat = _currentDay switch
             {
-                case 1:
-                    CurrentDayFormat = "1st";
-                    break;
-                case 2:
-                    CurrentDayFormat = "2nd";
-                    break;
-                case 3:
-                    CurrentDayFormat = "3rd";
-                    break;
-                default:
-                    CurrentDayFormat = $"{CurrentDay}th";
-                    break;
-            }
+                1 => "1st",
+                2 => "2nd",
+                3 => "3rd",
+                _ => $"{_currentDay}th"
+            };
 
-            if (displayDate.Value)
+            if (_displayDate.Value)
             {
-                Client.UpdateDetails($"{CurrentSeason}, {CurrentDayFormat}");
+                Client.UpdateDetails($"{_currentSeason}, {CurrentDayFormat}");
             }
 
             // Alternate Look
-            if (optionalLook.Value)
+            if (_optionalLook.Value)
             {
-                if (displayLocation.Value)
+                if (_displayLocation.Value)
                 {
-                    Client.UpdateState($"{CurrentArea}");
+                    Client.UpdateState($"{_currentArea}");
                 }
+                
 
-                if (displayLevel.Value && displayMoney.Value)
+                if (_displayLevel.Value && _displayMoney.Value)
                 {
-                    Client.UpdateSmallAsset(gender, $"Level {CurrentLevel} | {CurrentMoney}G");
+                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
                 }
-                else if (displayLevel.Value == false && displayMoney.Value)
+                else if (_displayLevel.Value == false && _displayMoney.Value)
                 {
-                    Client.UpdateSmallAsset(gender, $"Level {CurrentLevel} | {CurrentMoney}G");
+                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
                 }
-                else if (displayMoney.Value)
+                else if (_displayMoney.Value)
                 {
-                    Client.UpdateSmallAsset(gender, $"Level {CurrentLevel} | {CurrentMoney}G");
+                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
                 }
                 else
                 {
-                    Client.UpdateSmallAsset(gender, $"Level {CurrentLevel} | {CurrentMoney}G");
+                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
                 }
                 return;
             }
 
             // Show Location icon tooltip
-            if (displayLocation.Value)
+            if (_displayLocation.Value)
             {
-                Client.UpdateLargeAsset("icon", CurrentArea);
+                Client.UpdateLargeAsset("icon", _currentArea);
             }
 
             // State for Level & Money
-            if (displayLevel.Value && displayMoney.Value)
+            if (_displayLevel.Value && _displayMoney.Value)
             {
-                Client.UpdateState($"Level {CurrentLevel} | {CurrentMoney}G");
+                Client.UpdateState($"Level {_currentLevel} | {_currentMoney}G");
             }
-            else if (displayLevel.Value == false && displayMoney.Value)
+            else if (_displayLevel.Value == false && _displayMoney.Value)
             {
-                Client.UpdateState($"{CurrentMoney}G");
+                Client.UpdateState($"{_currentMoney}G");
             }
-            else if (displayLevel.Value && displayMoney.Value == false)
+            else if (_displayLevel.Value && _displayMoney.Value == false)
             {
-                Client.UpdateState($"Level {CurrentLevel}");
+                Client.UpdateState($"Level {_currentLevel}");
             }
 
             // Small Icon for Gender & Name
-            if (displayGender.Value && displayName.Value)
+            if (_displayGender.Value && _displayName.Value)
             {
                 Client.UpdateSmallAsset(gender, playername);
             }
-            else if (displayGender.Value == false && displayName.Value)
+            else if (_displayGender.Value == false && _displayName.Value)
             {
                 Client.UpdateSmallAsset("icon", playername);
             }
-            else if (displayGender.Value && displayName.Value == false)
+            else if (_displayGender.Value && _displayName.Value == false)
             {
                 Client.UpdateSmallAsset(gender);
             }
@@ -201,19 +193,19 @@ namespace RF5DRP
             // This one is need of fixes but ATM its not a priority
             [HarmonyPatch(typeof(TeleportAreaManager), nameof(TeleportAreaManager.EndTeleportCharacter))]
             [HarmonyPostfix]
-            public static void UpdateArea(TeleportAreaManager __instance)
+            public static void UpdateArea(TeleportAreaManager instance)
             {
-                string _CurrentArea = __instance.GetFieldPlaceName();
+                string currentArea = instance.GetFieldPlaceName();
 
 
                 // Currently no idea why teleporting and leaving area for first time makes it "Rigbarth" but leaving anytime after makes it field.
                 // This is the current "fix"
-                if (_CurrentArea == "Field")
+                if (currentArea == "Field")
                 {
-                    _CurrentArea = "Rigbarth";
+                    currentArea = "Rigbarth";
                 }
 
-                CurrentArea = _CurrentArea;
+                _currentArea = currentArea;
                 UpdatePresence();
             }
         }
@@ -223,12 +215,12 @@ namespace RF5DRP
         {
             [HarmonyPatch(typeof(PlayerStatus), nameof(PlayerStatus.LevelUp))]
             [HarmonyPostfix]
-            public static void UpdateLevel(PlayerStatus __instance)
+            public static void UpdateLevel(PlayerStatus instance)
             {
-                int _CurrentLevel = __instance.Level;
-                CurrentLevel = _CurrentLevel;
+                int currentLevel = instance.Level;
+                _currentLevel = currentLevel;
 
-                if (CurrentLevel > 0 && CurrentMoney >= 0)
+                if (_currentLevel > 0 && _currentMoney >= 0)
                 {
                     UpdatePresence();
                 }
@@ -240,12 +232,12 @@ namespace RF5DRP
         {
             [HarmonyPatch(typeof(HUDPlayerMoney), nameof(HUDPlayerMoney.RedrawText))]
             [HarmonyPostfix]
-            public static void UpdateMoney(HUDPlayerMoney __instance)
+            public static void UpdateMoney(HUDPlayerMoney instance)
             {
-                int _CurrentMoney = __instance.GetNowNum();
-                CurrentMoney = _CurrentMoney;
+                int currentMoney = instance.GetNowNum();
+                _currentMoney = currentMoney;
 
-                if (CurrentLevel > 0 && CurrentMoney >= 0)
+                if (_currentLevel > 0 && _currentMoney >= 0)
                 {
                     UpdatePresence();
                 }
@@ -260,10 +252,10 @@ namespace RF5DRP
             [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.ToNextMorning))]
             [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.AfterLoadData))]
             [HarmonyPostfix]
-            public static void UpdateMoney(TimeManager __instance)
+            public static void UpdateMoney(TimeManager instance)
             {
-                CurrentDay = __instance.Day;
-                CurrentSeason = __instance.Season.ToString();
+                _currentDay = instance.Day;
+                _currentSeason = instance.Season.ToString();
 
                 UpdatePresence();
             }
