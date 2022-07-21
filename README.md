@@ -22,7 +22,7 @@ There is also an alternate layout if you don't like the default.
 
 ## Issues & WIP
 This is my first ever C# mod for a game so it may not be perfect. There are a few issues that I hope to iron out later but for now they're not big deals.
-- There are multiples "areas" within Rigbarth that have names like "Great Tree Plaza" and "Phoros Woodlands" the event I have set up to catch these area names won't
+- There are multiples "areas" within Rigbarth that have names like "Great Tree Plaza" and "Phoros Woodlands" the event I have used up to catch these area names won't
 trigger if the character is just walking to them. I need more time to figure them out but if you teleport to areas such as 'Phoros Woodlands' it will change.
 - If the player stays up all night and the day passes it won't update on the presence to that new day. 
 - There are no area thumbnails due to mostly laziness and I was sure if they would look good.
