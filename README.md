@@ -27,10 +27,10 @@ All of the display options are optional and are changed through the config file 
 
 ## Issues & WIP
 This is my first ever mod for a game so it may not be perfect. There are a few issues that I hope to iron out later but for now they're not big deals.
-- There are multiples "areas" within Rigbarth that have names like "Great Tree Plaza" and "Phoros Woodlands" the event I have used up to catch these area names won't
+- There are multiples "areas" within Rigbarth like "Great Tree Plaza" and "Phoros Woodlands" the event I have used up to catch these area names won't
 trigger if the character is just walking to them. I need more time to figure them out but if you teleport to areas such as 'Phoros Woodlands' it will change.
 - If the player stays up all night and the day passes it won't update on the presence to that new day. 
-- There are no area thumbnails due to mostly laziness and I was sure if they would look good.
+- There are no area thumbnails due to mostly laziness and I wasn't sure if they would look good.
 
 I have not tested out the area output as much as I haven't played much of the game so there could possibly be problems with later areas.<br />
 If you come across any issues or problems that aren't listed here feel free to open an issue.
