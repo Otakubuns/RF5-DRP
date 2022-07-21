@@ -22,6 +22,7 @@ There is also an alternate layout if you don't like the default.
 
 ## Configuration
 All of the display options are optional and are changed through the config file located at **Rune Factory 5/BepInEx/config/RF5DRP.cfg**.
+<br />All settings are default to true except alternate layout.
 <br />This file will not show up until you've run the game at least once while the plugin is in your plugins folder.
 
 ## Issues & WIP
