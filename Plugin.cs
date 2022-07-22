@@ -4,6 +4,8 @@ using HarmonyLib;
 using DiscordRPC;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using Il2CppSystem;
+using UnityEngine.Playables;
 
 namespace RF5DRP
 {
@@ -131,21 +133,20 @@ namespace RF5DRP
                 }
                 
 
-                if (_displayLevel.Value && _displayMoney.Value)
+                switch (_displayLevel.Value)
                 {
-                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
-                }
-                else if (_displayLevel.Value == false && _displayMoney.Value)
-                {
-                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
-                }
-                else if (_displayMoney.Value)
-                {
-                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
-                }
-                else
-                {
-                    Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
+                    case true when _displayMoney.Value:
+                        Client.UpdateSmallAsset(gender, $"Level {_currentLevel} | {_currentMoney}G");
+                        break;
+                    case false when _displayMoney.Value:
+                        Client.UpdateSmallAsset(gender, $"{_currentMoney}G");
+                        break;
+                    case true when _displayMoney.Value == false:
+                        Client.UpdateSmallAsset(gender, $"Level {_currentLevel}");
+                        break;
+                    default:
+                        Client.UpdateSmallAsset(gender);
+                        break;
                 }
                 return;
             }
@@ -156,35 +157,46 @@ namespace RF5DRP
                 Client.UpdateLargeAsset("icon", _currentArea);
             }
 
-            // State for Level & Money
-            if (_displayLevel.Value && _displayMoney.Value)
+            switch (_displayLevel.Value)
             {
-                Client.UpdateState($"Level {_currentLevel} | {_currentMoney}G");
-            }
-            else if (_displayLevel.Value == false && _displayMoney.Value)
-            {
-                Client.UpdateState($"{_currentMoney}G");
-            }
-            else if (_displayLevel.Value && _displayMoney.Value == false)
-            {
-                Client.UpdateState($"Level {_currentLevel}");
+                // State for Level & Money
+                case true when _displayMoney.Value:
+                    Client.UpdateState($"Level {_currentLevel} | {_currentMoney}G");
+                    break;
+                case false when _displayMoney.Value:
+                    Client.UpdateState($"{_currentMoney}G");
+                    break;
+                case true when _displayMoney.Value == false:
+                    Client.UpdateState($"Level {_currentLevel}");
+                    break;
             }
 
-            // Small Icon for Gender & Name
-            if (_displayGender.Value && _displayName.Value)
+            switch (_displayGender.Value)
             {
-                Client.UpdateSmallAsset(gender, playername);
-            }
-            else if (_displayGender.Value == false && _displayName.Value)
-            {
-                Client.UpdateSmallAsset("icon", playername);
-            }
-            else if (_displayGender.Value && _displayName.Value == false)
-            {
-                Client.UpdateSmallAsset(gender);
+                // Small Icon for Gender & Name
+                case true when _displayName.Value:
+                    Client.UpdateSmallAsset(gender, playername);
+                    break;
+                case false when _displayName.Value:
+                    Client.UpdateSmallAsset("icon", playername);
+                    break;
+                case true when _displayName.Value == false:
+                    Client.UpdateSmallAsset(gender);
+                    break;
             }
         }
 
+
+        // Band-aid fix for staying up after midnight
+        public static void CheckTime()
+        {
+            TimeManager time = TimeManager.Instance;
+
+            if (!time.Day.Equals(_currentDay))
+            {
+                _currentDay = time.Day;
+            }
+        }
 
 
         [HarmonyPatch]
@@ -196,6 +208,7 @@ namespace RF5DRP
             public static void UpdateArea(TeleportAreaManager __instance)
             {
                 string currentArea = __instance.GetFieldPlaceName();
+                
 
                 // Currently no idea why teleporting and leaving area for first time makes it "Rigbarth" but leaving anytime after makes it field.
                 // This is the current "fix"
@@ -205,6 +218,7 @@ namespace RF5DRP
                 }
 
                 _currentArea = currentArea;
+                CheckTime();
                 UpdatePresence();
             }
         }
@@ -220,10 +234,10 @@ namespace RF5DRP
                 int currentLevel = __instance.Level;
                 _currentLevel = currentLevel;
 
-                if (_currentLevel > 0 && _currentMoney >= 0)
-                {
-                    UpdatePresence();
-                }
+                // 
+                if (_currentLevel <= 0 || _currentMoney < 0) return;
+                CheckTime();
+                UpdatePresence();
             }
         }
 
@@ -237,10 +251,11 @@ namespace RF5DRP
                 int currentMoney = __instance.GetNowNum();
                 _currentMoney = currentMoney;
 
-                if (_currentLevel > 0 && _currentMoney >= 0)
-                {
-                    UpdatePresence();
-                }
+                // HUDPlayerMoney loads faster in initial load so this makes sure the player doesn't have "level 0" for a second
+                if (_currentLevel <= 0 || _currentMoney < 0) return;
+
+                CheckTime();
+                UpdatePresence();
             }
         }
 
