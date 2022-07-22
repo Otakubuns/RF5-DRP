@@ -193,10 +193,9 @@ namespace RF5DRP
             // This one is need of fixes but ATM its not a priority
             [HarmonyPatch(typeof(TeleportAreaManager), nameof(TeleportAreaManager.EndTeleportCharacter))]
             [HarmonyPostfix]
-            public static void UpdateArea(TeleportAreaManager instance)
+            public static void UpdateArea(TeleportAreaManager __instance)
             {
-                string currentArea = instance.GetFieldPlaceName();
-
+                string currentArea = __instance.GetFieldPlaceName();
 
                 // Currently no idea why teleporting and leaving area for first time makes it "Rigbarth" but leaving anytime after makes it field.
                 // This is the current "fix"
@@ -210,14 +209,15 @@ namespace RF5DRP
             }
         }
 
+
         [HarmonyPatch]
         public class PlayerLevel
         {
             [HarmonyPatch(typeof(PlayerStatus), nameof(PlayerStatus.LevelUp))]
             [HarmonyPostfix]
-            public static void UpdateLevel(PlayerStatus instance)
+            public static void UpdateLevel(PlayerStatus __instance)
             {
-                int currentLevel = instance.Level;
+                int currentLevel = __instance.Level;
                 _currentLevel = currentLevel;
 
                 if (_currentLevel > 0 && _currentMoney >= 0)
@@ -232,9 +232,9 @@ namespace RF5DRP
         {
             [HarmonyPatch(typeof(HUDPlayerMoney), nameof(HUDPlayerMoney.RedrawText))]
             [HarmonyPostfix]
-            public static void UpdateMoney(HUDPlayerMoney instance)
+            public static void UpdateMoney(HUDPlayerMoney __instance)
             {
-                int currentMoney = instance.GetNowNum();
+                int currentMoney = __instance.GetNowNum();
                 _currentMoney = currentMoney;
 
                 if (_currentLevel > 0 && _currentMoney >= 0)
@@ -252,10 +252,10 @@ namespace RF5DRP
             [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.ToNextMorning))]
             [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.AfterLoadData))]
             [HarmonyPostfix]
-            public static void UpdateMoney(TimeManager instance)
+            public static void UpdateMoney(TimeManager __instance)
             {
-                _currentDay = instance.Day;
-                _currentSeason = instance.Season.ToString();
+                _currentDay = __instance.Day;
+                _currentSeason = __instance.Season.ToString();
 
                 UpdatePresence();
             }
