@@ -111,17 +111,34 @@ namespace RF5DRP
             string playername = TextOverwriteList.GetPlayerName();
             _currentLevel = level;
 
-            string CurrentDayFormat = _currentDay switch
+            // Change endings to approiate number (st, th, nd)
+            string DateSuffix = "";
+            var currentDayFormat = _currentDay;
+
+            string GetDaySuffix(int day)
             {
-                1 => "1st",
-                2 => "2nd",
-                3 => "3rd",
-                _ => $"{_currentDay}th"
-            };
+                switch (day)
+                {
+                    case 1:
+                    case 21:
+                    case 31:
+                        return "st";
+                    case 2:
+                    case 22:
+                        return "nd";
+                    case 3:
+                    case 23:
+                        return "rd";
+                    default:
+                        return "th";
+                }
+            }
+
+            DateSuffix = GetDaySuffix(currentDayFormat);
 
             if (_displayDate.Value)
             {
-                Client.UpdateDetails($"{_currentSeason}, {CurrentDayFormat}");
+                Client.UpdateDetails($"{_currentSeason}, {currentDayFormat}{DateSuffix}");
             }
 
             // Alternate Look
@@ -185,7 +202,6 @@ namespace RF5DRP
                     break;
             }
         }
-
 
         // Band-aid fix for staying up after midnight
         public static void CheckTime()
