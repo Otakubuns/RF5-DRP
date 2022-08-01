@@ -12,9 +12,7 @@ This plugin display your characters:
 All of these settings are customizable through the config file.<br />
 There is also an alternate layout if you don't like the default.
 
-![Layout Example](https://user-images.githubusercontent.com/77337386/182056394-dedd931d-7d99-4a18-9c94-fe9b608f8d4e.png)
-
-
+![Layout Example](https://user-images.githubusercontent.com/77337386/182056592-0f0418ea-5e22-4e78-a9c8-d80306f17c0b.png)
 
 
 ## Installation
